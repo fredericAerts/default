@@ -7,12 +7,10 @@ var plugins = require("gulp-load-plugins")({
 });
 var del = require('del');
 
-// Load the notifier.
-var Notifier = require('node-notifier');
-
-// Set to false if you don't want notifications when an error happens.
-// (Errors will still be logged in Terminal)
-var showErrorNotifications = true;
+var errorHandler = function(err) {
+    console.log(err);
+    this.emit('end');
+};
 
 
 /* Config
@@ -27,7 +25,8 @@ var paths = {
         'bower_components/jquery/dist/jquery.js',
         'src/scripts/vendor/*.js',
         'src/scripts/app/*.js',
-        'src/scripts/*.js'], 
+        'src/scripts/*.js'
+      ], 
       img: [
         'src/img/**/*'
       ]  
@@ -101,6 +100,9 @@ gulp.task('livereload', function() {
 // styles
 gulp.task('styles', function() {
   return gulp.src( paths.src.all.scss )
+    .pipe(plugins.plumber({
+        handleError: errorHandler
+    }))
     .pipe(plugins.sass({ 
       debugInfo   : true,
       lineNumbers : true,
@@ -108,11 +110,8 @@ gulp.task('styles', function() {
       sourceComments: 'normal',
       onError: function(err) {
          return plugins.notify().write(err);
-      } 
+      }
     }))
-    .on('error', function (err){
-        errorLogger('SASS Compilation Error', err.message);
-    })
     .pipe(plugins.autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))
     .pipe(plugins.concat('style.css'))
     .pipe(gulp.dest('web/.temp/styles'))
@@ -124,19 +123,22 @@ gulp.task('styles', function() {
 // scripts 
 gulp.task('scripts', function() {
   return gulp.src( paths.src.all.js )
+    .pipe(plugins.plumber({
+        handleError: errorHandler
+    }))
     .pipe(plugins.concat('script.js'))
     .pipe(gulp.dest('web/.temp/scripts'))
     .pipe(plugins.rename({suffix: '.min'}))
     .pipe(plugins.uglify())
-    .on('error', function (err){
-        errorLogger('Javascript Error', err.message);
-    })
     .pipe(gulp.dest('web/scripts'));
 });
 
 // jshint
 gulp.task('jshint', function() {
   return gulp.src(paths.src.custom.js)
+    .pipe(plugins.plumber({
+          handleError: errorHandler
+    }))
     .pipe(plugins.jshint('.jshintrc'))
     .pipe(plugins.jshint())
     .pipe(plugins.jshint.reporter(require('jshint-stylish')));
