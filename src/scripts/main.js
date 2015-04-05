@@ -18,12 +18,11 @@ defaultApp.app = (function($, window, undefined) {
 
     // On Scroll
     appScroll = function() {
-        // Put functions in the '_update' function :-)
         var _onScroll;
 
         _onScroll = debounce(function() {
             console.log('scrolling');
-        },50);
+        }, 50);
 
         $(window).scroll(function(){
             _onScroll();

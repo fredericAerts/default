@@ -1,7 +1,13 @@
-// vendor       
+/*	Vendor
+	=============================== */
 @import	'vendor/bourbon',
 		'vendor/bourbon-vars';
 
-// general        
+/*	Helpers
+	=============================== */
+@import	'helpers/variables';
+
+/*	General
+	=============================== */
 @import 'general/base';
 

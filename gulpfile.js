@@ -1,31 +1,88 @@
+/* Setup Gulp
+   ========================================================================== */
 var gulp = require('gulp');
 var plugins = require("gulp-load-plugins")({
   pattern: ['gulp-*', 'gulp.*'],
   replaceString: /\bgulp[\-.]/
 });
 var del = require('del');
-var errorHandler = function(err) {
-    console.log(err);
-    this.emit('end');
-};
+
+// Load the notifier.
+var Notifier = require('node-notifier');
+
+// Set to false if you don't want notifications when an error happens.
+// (Errors will still be logged in Terminal)
+var showErrorNotifications = true;
+
+
+/* Config
+   ========================================================================== */
 var paths = {
   src: {
     all: {
-      scss: ['src/scss/*.scss','src/scss/**/*.scss'],
-      js: ['src/scripts/vendor/*.js','src/scripts/app/*.js','src/scripts/*.js'], // order matters
-      img: ['src/img/*','src/img/**/*']  
+      scss: [
+        'src/scss/**/*.scss'
+      ],
+      js: [
+        'bower_components/jquery/dist/jquery.js',
+        'src/scripts/vendor/*.js',
+        'src/scripts/app/*.js',
+        'src/scripts/*.js'], 
+      img: [
+        'src/img/**/*'
+      ]  
     },
     vendor: {
       js: 'src/scripts/vendor/'
     },
     custom: {
-      js: ['src/scripts/*.js']
+      js: [
+      'src/scripts/app/*.js',
+      'src/scripts/*.js'
+      ]
     }  
   },
-  web: ['web/styles/*.css', 'web/scripts/*.js', 'web/img/*' , '*.html'], // only reload when these change
-  
+  livereload: [
+    'web/styles/*.css', 
+    'web/scripts/*.js', 
+    'web/img/*', 
+    '*.html'
+  ],
+  web: {
+    images: 'web/img'
+  } 
 }
 
+/* Errorhandling
+   ========================================================================== */
+var errorLogger = function(headerMessage,errorMessage){
+  var header = headerLines(headerMessage);
+  header += '\n             '+ headerMessage +'\n           ';
+  header += headerLines(headerMessage);
+  header += '\r\n \r\n';
+  plugins.util.log(plugins.util.colors.red(header) + '             ' + errorMessage + '\r\n')
+
+  if(showErrorNotifications){
+    var notifier = new Notifier();
+    notifier.notify({
+      'title': headerMessage,
+      'message': errorMessage,
+      'contentImage':  __dirname + "/gulp_error.jpg"
+    });
+  }
+};
+
+var headerLines = function(message){
+  var lines = '';
+  for(var i = 0; i< (message.length + 4); i++){
+    lines += '-';
+  }
+  return lines;
+};
+
+/* Tasks
+   ========================================================================== */
+// serve at localhost:8080
 gulp.task('webserver', function() {
   plugins.connect.server({
     root: __dirname,
@@ -33,17 +90,17 @@ gulp.task('webserver', function() {
   });
 });
 
+
+// livereload
 gulp.task('livereload', function() {
-  gulp.src( paths.web )
-    .pipe(plugins.watch( paths.web ))
+  gulp.src( paths.livereload )
+    .pipe(plugins.watch( paths.livereload ))
     .pipe(plugins.connect.reload());
 });
 
+// styles
 gulp.task('styles', function() {
   return gulp.src( paths.src.all.scss )
-    .pipe(plugins.plumber({
-        handleError: errorHandler
-    }))
     .pipe(plugins.sass({ 
       debugInfo   : true,
       lineNumbers : true,
@@ -53,6 +110,9 @@ gulp.task('styles', function() {
          return plugins.notify().write(err);
       } 
     }))
+    .on('error', function (err){
+        errorLogger('SASS Compilation Error', err.message);
+    })
     .pipe(plugins.autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))
     .pipe(plugins.concat('style.css'))
     .pipe(gulp.dest('web/.temp/styles'))
@@ -61,35 +121,42 @@ gulp.task('styles', function() {
     .pipe(gulp.dest('web/styles'));
 });
 
+// scripts 
 gulp.task('scripts', function() {
   return gulp.src( paths.src.all.js )
-    .pipe(plugins.plumber({
-        handleError: errorHandler
-    }))
     .pipe(plugins.concat('script.js'))
     .pipe(gulp.dest('web/.temp/scripts'))
     .pipe(plugins.rename({suffix: '.min'}))
     .pipe(plugins.uglify())
+    .on('error', function (err){
+        errorLogger('Javascript Error', err.message);
+    })
     .pipe(gulp.dest('web/scripts'));
 });
 
+// jshint
 gulp.task('jshint', function() {
   return gulp.src(paths.src.custom.js)
-    .pipe(plugins.plumber({
-        handleError: errorHandler
-    }))
-    // Jshint
     .pipe(plugins.jshint('.jshintrc'))
     .pipe(plugins.jshint())
     .pipe(plugins.jshint.reporter(require('jshint-stylish')));
 });
 
+// images
 gulp.task('images', function() {
   return gulp.src( paths.src.all.img )
-    .pipe(plugins.imagemin({ optimizationLevel: 5, progressive: true, interlaced: true }))
+    .pipe(plugins.changed(paths.web.images))
+    .pipe(plugins.imagemin({ 
+      optimizationLevel: 5, 
+      progressive: true, 
+      interlaced: true,
+      svgoPlugins: [{removeViewBox: false}]
+    }))
     .pipe(gulp.dest('web/img'));
 });
 
+
+// clean web folder
 gulp.task('clean', function(cb) {
     del(['web'], cb)
 });
