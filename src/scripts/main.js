@@ -1,45 +1,46 @@
 var defaultApp = defaultApp || {};
 
-defaultApp.app = (function($, window, undefined) {
+defaultApp.app = (($, window, undefined) => {
 
-    var init, initOnload, appScroll, debounce;
+    let init, initOnload, appScroll, debounce;
 
 
     // On Dom ready
-    init = function() {
+    init = () => {
         defaultApp.nav.init();
+        console.log('hello','init');
     };
 
 
     // On All loaded
-    initOnload = function() {
+    initOnload = () => {
         appScroll();
     };
 
     // On Scroll
-    appScroll = function() {
-        var _onScroll;
+    appScroll = () => {
+        let _onScroll;
 
-        _onScroll = debounce(function() {
+        _onScroll = debounce(() => {
             console.log('scrolling');
         }, 50);
 
-        $(window).scroll(function(){
+        $(window).scroll(() =>{
             _onScroll();
         });
     };
 
-    debounce = function(func, wait, immediate){
-        var timeout;
-        return function() {
-            var context = this, args = arguments;
-            var later = function() {
+    debounce = (func, wait, immediate) => {
+        let timeout;
+        return (...args) => {
+            let context = this;
+            let later = () => {
                 timeout = null;
                 if (!immediate) {
                     func.apply(context, args);
                 }
             };
-            var callNow = immediate && !timeout;
+            let callNow = immediate && !timeout;
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
             if (callNow) {
@@ -57,11 +58,11 @@ defaultApp.app = (function($, window, undefined) {
 
 
 // Dom ready
-$(function() {
+$(() => {
     defaultApp.app.init();
 });
 
 // All loaded
-$(window).load(function() {
+$(window).load(() => {
     defaultApp.app.initOnload();
 });

@@ -1,17 +1,17 @@
 var defaultApp = defaultApp || {};
 
-defaultApp.nav = (function($, window, undefined) {
+defaultApp.nav = (($, window, undefined) => {
 
     var init, testFunction;
 
 
-    init = function() {
+    init = () => {
         
     };
 
 
-    testFunction = function(test) {
-        return function() {
+    testFunction = (test) => {
+        return () => {
             
         };
     };

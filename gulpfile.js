@@ -127,6 +127,7 @@ gulp.task('scripts', function() {
         handleError: errorHandler
     }))
     .pipe(plugins.concat('script.js'))
+    .pipe(plugins.babel())
     .pipe(gulp.dest('web/.temp/scripts'))
     .pipe(plugins.rename({suffix: '.min'}))
     .pipe(plugins.uglify())
@@ -139,6 +140,7 @@ gulp.task('jshint', function() {
     .pipe(plugins.plumber({
           handleError: errorHandler
     }))
+    .pipe(plugins.babel())
     .pipe(plugins.jshint('.jshintrc'))
     .pipe(plugins.jshint())
     .pipe(plugins.jshint.reporter(require('jshint-stylish')));
