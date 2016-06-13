@@ -22,14 +22,14 @@ var paths = {
         'src/scss/**/*.scss'
       ],
       js: [
-        'bower_components/jquery/dist/jquery.js',
+        'node_modules/jquery/dist/jquery.js',
         'src/scripts/vendor/*.js',
         'src/scripts/app/*.js',
         'src/scripts/*.js'
-      ], 
+      ],
       img: [
         'src/img/**/*'
-      ]  
+      ]
     },
     vendor: {
       js: 'src/scripts/vendor/'
@@ -39,17 +39,17 @@ var paths = {
       'src/scripts/app/*.js',
       'src/scripts/*.js'
       ]
-    }  
+    }
   },
   livereload: [
-    'web/styles/*.css', 
-    'web/scripts/*.js', 
-    'web/img/*', 
+    'web/styles/*.css',
+    'web/scripts/*.js',
+    'web/img/*',
     '*.html'
   ],
   web: {
     images: 'web/img'
-  } 
+  }
 }
 
 /* Errorhandling
@@ -103,10 +103,10 @@ gulp.task('styles', function() {
     .pipe(plugins.plumber({
         handleError: errorHandler
     }))
-    .pipe(plugins.sass({ 
+    .pipe(plugins.sass({
       debugInfo   : true,
       lineNumbers : true,
-      style: 'expanded', 
+      style: 'expanded',
       sourceComments: 'normal',
       onError: function(err) {
          return plugins.notify().write(err);
@@ -116,11 +116,11 @@ gulp.task('styles', function() {
     .pipe(plugins.concat('style.css'))
     .pipe(gulp.dest('web/.temp/styles'))
     .pipe(plugins.rename({suffix: '.min'}))
-    .pipe(plugins.minifyCss())
+    .pipe(plugins.cssnano())
     .pipe(gulp.dest('web/styles'));
 });
 
-// scripts 
+// scripts
 gulp.task('scripts', function() {
   return gulp.src( paths.src.all.js )
     .pipe(plugins.plumber({
@@ -150,9 +150,9 @@ gulp.task('jshint', function() {
 gulp.task('images', function() {
   return gulp.src( paths.src.all.img )
     .pipe(plugins.changed(paths.web.images))
-    .pipe(plugins.imagemin({ 
-      optimizationLevel: 5, 
-      progressive: true, 
+    .pipe(plugins.imagemin({
+      optimizationLevel: 5,
+      progressive: true,
       interlaced: true,
       svgoPlugins: [{removeViewBox: false}]
     }))
@@ -162,7 +162,7 @@ gulp.task('images', function() {
 
 // clean web folder
 gulp.task('clean', function(cb) {
-    del(['web'], cb)
+    return del(['web'], {force: true});
 });
 
 gulp.task('watch', function() {
@@ -170,7 +170,7 @@ gulp.task('watch', function() {
   gulp.watch(paths.src.all.scss, ['styles']);
   // Watch .js files
   gulp.watch(paths.src.all.js, ['scripts']);
-  // jsHint 
+  // jsHint
   gulp.watch(paths.src.custom.js, ['jshint']);
   // Watch image files
   gulp.watch(paths.src.all.img, ['images']);
