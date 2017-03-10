@@ -1,0 +1,25 @@
+{
+  "src": {
+    "css": {
+      "entry": "./src/scss/main.scss",
+      "all": "./src/scss/**/*.scss"
+    },
+    "js": {
+      "vendor": [],
+      "app": "./src/js/**/*.js"
+    },
+    "img": "src/img/**/*",
+    "fonts": "src/fonts/*"
+  },
+  "dest": {
+    "css": "./web/css",
+    "js": "./web/js",
+    "img": "./web/img",
+    "fonts": "./web/fonts"
+  },
+  "gulp": {
+    "js": {
+      "all": "./gulp/**/*.js"
+    }
+  }
+}
